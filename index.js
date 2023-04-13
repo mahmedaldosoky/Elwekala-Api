@@ -133,7 +133,7 @@ app.post("/logout", async (req, res) => {
   }
 });
 
-router.post("/profile", async (req, res) => {
+app.post("/profile", async (req, res) => {
   try {
     const { token } = req.body;
     const existingUser = await User.findOne({ token });
@@ -149,7 +149,7 @@ router.post("/profile", async (req, res) => {
   }
 });
 
-router.put("/update", async (req, res) => {
+app.put("/update", async (req, res) => {
   try {
     const ID = req.body.id;
 
