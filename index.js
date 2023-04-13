@@ -11,14 +11,14 @@ app.post("/register", async (req, res) => {
 
     if (!name || !email || !phone || !nationalId || !gender || !password) {
       return res
-        .status(400)
+        .status(200)
         .json({ status: "error", message: "Invalid user data", user: null });
     }
 
     // Validate name to not be more than 2 words
     const nameWords = name.split(" ");
     if (nameWords.length > 2) {
-      return res.status(400).json({
+      return res.status(200).json({
         status: "error",
         message: "Name can't have more than 2 words",
         user: null,
@@ -65,7 +65,7 @@ app.post("/login", async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({
+      return res.status(200).json({
         status: "error",
         message: "Email and password are required",
         user: null,
@@ -76,7 +76,7 @@ app.post("/login", async (req, res) => {
 
     if (!user) {
       return res
-        .status(404)
+        .status(200)
         .json({ status: "error", message: "User not found", user: null });
     }
 
@@ -84,7 +84,7 @@ app.post("/login", async (req, res) => {
 
     if (!isPasswordValid) {
       return res
-        .status(401)
+        .status(200)
         .json({ status: "error", message: "Invalid password", user: null });
     }
 
@@ -118,7 +118,7 @@ app.post("/logout", async (req, res) => {
 
     if (!user) {
       return res
-        .status(404)
+        .status(200)
         .json({ status: "error", message: "User not found" });
     }
 
@@ -138,7 +138,7 @@ app.post("/profile", async (req, res) => {
     const { token } = req.body;
     const existingUser = await User.findOne({ token });
     if (!existingUser)
-      return res.status(404).json({ message: "Not valid user.", user: null });
+      return res.status(200).json({ message: "Not valid user.", user: null });
 
     const { name, email, phone, nationalId, gender } = existingUser;
 
@@ -166,7 +166,7 @@ app.put("/update", async (req, res) => {
     const { token } = req.body;
     const existingUser = await User.findOne({ token });
     if (!existingUser)
-      return res.status(404).json({ message: "Not valid user.", user: null });
+      return res.status(200).json({ message: "Not valid user.", user: null });
 
     const { name, email, phone, nationalId, gender, password } = existingUser;
 
@@ -180,7 +180,7 @@ app.put("/update", async (req, res) => {
 
     const afterUpdate = await User.updateOne({ token: token}, { $set: updateUser });
     if (!afterUpdate)
-      return res.status(404).json({ message: "Not valid user." });
+      return res.status(200).json({ message: "Not valid user." });
 
       res.status(201).json({
         status: "success",
