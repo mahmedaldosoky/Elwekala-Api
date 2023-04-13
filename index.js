@@ -15,6 +15,17 @@ app.post("/register", async (req, res) => {
         .json({ status: "error", message: "Invalid user data" });
     }
 
+    // Validate name to not be more than 2 words
+    const nameWords = name.split(" ");
+    if (nameWords.length > 2) {
+      return res
+        .status(400)
+        .json({
+          status: "error",
+          message: "Name can't have more than 2 words",
+        });
+    }
+
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res
