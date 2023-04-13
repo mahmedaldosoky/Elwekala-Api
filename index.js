@@ -12,25 +12,28 @@ app.post("/register", async (req, res) => {
     if (!name || !email || !phone || !nationalId || !gender || !password) {
       return res
         .status(400)
-        .json({ status: "error", message: "Invalid user data",user:null});
+        .json({ status: "error", message: "Invalid user data", user: null });
     }
 
     // Validate name to not be more than 2 words
     const nameWords = name.split(" ");
     if (nameWords.length > 2) {
-      return res
-        .status(400)
-        .json({
-          status: "error",
-          message: "Name can't have more than 2 words",user:null
-        });
+      return res.status(400).json({
+        status: "error",
+        message: "Name can't have more than 2 words",
+        user: null,
+      });
     }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res
         .status(409)
-        .json({ status: "error", message: "Email already registered" ,user:null});
+        .json({
+          status: "error",
+          message: "Email already registered",
+          user: null,
+        });
     }
 
     const token = generateToken();
@@ -55,7 +58,7 @@ app.post("/register", async (req, res) => {
       user: { name, email, phone, nationalId, gender, token },
     });
   } catch (err) {
-    res.status(500).json({ status: "error", message: err.message,user:null });
+    res.status(500).json({ status: "error", message: err.message, user: null });
   }
 });
 
@@ -66,7 +69,7 @@ app.post("/login", async (req, res) => {
     if (!email || !password) {
       return res
         .status(400)
-        .json({ status: "error", message: "Email and password are required" });
+        .json({ status: "error", message: "Email and password are required",user:null });
     }
 
     const user = await User.findOne({ email });
@@ -74,7 +77,7 @@ app.post("/login", async (req, res) => {
     if (!user) {
       return res
         .status(404)
-        .json({ status: "error", message: "User not found" });
+        .json({ status: "error", message: "User not found" ,user:null});
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -82,7 +85,7 @@ app.post("/login", async (req, res) => {
     if (!isPasswordValid) {
       return res
         .status(401)
-        .json({ status: "error", message: "Invalid password" });
+        .json({ status: "error", message: "Invalid password",user:null });
     }
 
     const token = generateToken();
@@ -103,7 +106,7 @@ app.post("/login", async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ status: "error", message: err.message });
+    res.status(500).json({ status: "error", message: err.message ,user:null});
   }
 });
 
@@ -126,6 +129,45 @@ app.post("/logout", async (req, res) => {
       .status(200)
       .json({ status: "success", message: "User logged out successfully" });
   } catch (err) {
+    res.status(500).json({ status: "error", message: err.message });
+  }
+});
+
+router.post("/profile", async (req, res) => {
+  try {
+    const { token } = req.body;
+    const existingUser = await User.findOne({ token });
+    if (!existingUser)
+      return res.status(404).json({ message: "Not valid user." });
+    res.status(201).json({
+      status: "success",
+      message: "User registered successfully",
+      user: existingUser,
+    });
+  } catch (error) {
+    res.status(500).json({ status: "error", message: err.message });
+  }
+});
+
+router.put("/update", async (req, res) => {
+  try {
+    const ID = req.body.id;
+
+    const updateUser = {
+      name: req.body.name,
+      email: req.body.email,
+      phone: req.body.phone,
+    };
+
+    const afterUpdate = await User.updateOne({ _id: ID }, { $set: updateUser });
+    if (!afterUpdate)
+      return res.status(404).json({ message: "Not valid user." });
+    res.status(201).json({
+      status: "success",
+      message: "User registered successfully",
+      user: existingUser,
+    });
+  } catch (error) {
     res.status(500).json({ status: "error", message: err.message });
   }
 });
