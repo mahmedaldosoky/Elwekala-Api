@@ -163,34 +163,44 @@ app.post("/profile", async (req, res) => {
 
 app.put("/update", async (req, res) => {
   try {
-    const ID = req.body.id;
+    const { token } = req.body;
+    const existingUser = await User.findOne({ token });
+    if (!existingUser)
+      return res.status(404).json({ message: "Not valid user.", user: null });
+
+    const { name, email, phone, nationalId, gender, password } = existingUser;
+
 
     const updateUser = {
       name: req.body.name,
       email: req.body.email,
-      phone: req.body.phone,
+      password: req.body.password,
+      phone: req.body.phone
     };
 
-    const afterUpdate = await User.updateOne({ _id: ID }, { $set: updateUser });
+    const afterUpdate = await User.updateOne({ token: token}, { $set: updateUser });
     if (!afterUpdate)
       return res.status(404).json({ message: "Not valid user." });
-    res.status(201).json({
-      status: "success",
-      message: "User data updated successfully",
-      user: {
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        nationalId: user.nationalId,
-        gender: user.gender,
-        token,
-      },
-    });
+
+      res.status(201).json({
+        status: "success",
+        message: "User data updated successfully",
+        user: {
+          name,
+          email,
+          phone,
+          password,
+          nationalId,
+          gender,
+          token,
+        },
+      });
   } catch (error) {
-    res.status(500).json({ status: "error", message: err.message });
+    res
+    .status(500)
+    .json({ status: "error", message: error.message, user: null });
   }
 });
-
 function generateToken() {
   return Math.random().toString(36).substr(2) + Date.now().toString(36);
 }
