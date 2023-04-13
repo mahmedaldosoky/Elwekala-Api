@@ -12,7 +12,7 @@ app.post("/register", async (req, res) => {
     if (!name || !email || !phone || !nationalId || !gender || !password) {
       return res
         .status(400)
-        .json({ status: "error", message: "Invalid user data" });
+        .json({ status: "error", message: "Invalid user data",user:null});
     }
 
     // Validate name to not be more than 2 words
@@ -22,7 +22,7 @@ app.post("/register", async (req, res) => {
         .status(400)
         .json({
           status: "error",
-          message: "Name can't have more than 2 words",
+          message: "Name can't have more than 2 words",user:null
         });
     }
 
@@ -30,7 +30,7 @@ app.post("/register", async (req, res) => {
     if (existingUser) {
       return res
         .status(409)
-        .json({ status: "error", message: "Email already registered" });
+        .json({ status: "error", message: "Email already registered" ,user:null});
     }
 
     const token = generateToken();
@@ -55,7 +55,7 @@ app.post("/register", async (req, res) => {
       user: { name, email, phone, nationalId, gender, token },
     });
   } catch (err) {
-    res.status(500).json({ status: "error", message: err.message });
+    res.status(500).json({ status: "error", message: err.message,user:null });
   }
 });
 
