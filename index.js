@@ -138,21 +138,26 @@ app.post("/profile", async (req, res) => {
     const { token } = req.body;
     const existingUser = await User.findOne({ token });
     if (!existingUser)
-      return res.status(404).json({ message: "Not valid user." });
+      return res.status(404).json({ message: "Not valid user.", user: null });
+
+    const { name, email, phone, nationalId, gender } = existingUser;
+
     res.status(201).json({
       status: "success",
       message: "User data returned successfully",
       user: {
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        nationalId: user.nationalId,
-        gender: user.gender,
+        name,
+        email,
+        phone,
+        nationalId,
+        gender,
         token,
       },
     });
   } catch (error) {
-    res.status(500).json({ status: "error", message: err.message });
+    res
+      .status(500)
+      .json({ status: "error", message: error.message, user: null });
   }
 });
 
