@@ -133,31 +133,69 @@ app.post("/logout", async (req, res) => {
   }
 });
 
-app.post("/profile", async (req, res) => {
+// app.post("/profile", async (req, res) => {
+//   try {
+//     const { token } = req.body;
+//     const existingUser = await User.findOne({ token });
+//     if (!existingUser)
+//       return res.status(200).json({ message: "Not valid user.", user: null });
+
+//     const { name, email, phone, nationalId, gender } = existingUser;
+
+//     res.status(201).json({
+//       status: "success",
+//       message: "User data returned successfully",
+//       user: {
+//         name,
+//         email,
+//         phone,
+//         nationalId,
+//         gender,
+//         token,
+//       },
+//     });
+//   } catch (error) {
+//     res
+//       .status(500)
+//       .json({ status: "error", message: error.message, user: null });
+//   }
+// });
+
+app.get("/profile", async (req, res) => {
   try {
     const { token } = req.body;
-    const existingUser = await User.findOne({ token });
-    if (!existingUser)
-      return res.status(200).json({ message: "Not valid user.", user: null });
 
-    const { name, email, phone, nationalId, gender } = existingUser;
+    if (!token) {
+      return res
+        .status(200)
+        .json({ status: "error", message: "empty token error", user: null });
+    }
 
-    res.status(201).json({
+    const user = await User.findOne({ token });
+
+    if (!user) {
+      return res
+        .status(200)
+        .json({ status: "error", message: "User not found", user: null });
+    }
+
+    res.status(200).json({
       status: "success",
-      message: "User data returned successfully",
+      message: null,
       user: {
-        name,
-        email,
-        phone,
-        nationalId,
-        gender,
-        token,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        nationalId: user.nationalId,
+        gender: user.gender,
+        token: token,
       },
     });
-  } catch (error) {
+  } catch (err) {
+    console.error(err);
     res
-      .status(500)
-      .json({ status: "error", message: error.message, user: null });
+      .status(200)
+      .json({ status: "error", message: "Server error", user: null });
   }
 });
 
@@ -170,35 +208,37 @@ app.put("/update", async (req, res) => {
 
     const { name, email, phone, nationalId, gender, password } = existingUser;
 
-
     const updateUser = {
       name: req.body.name,
       email: req.body.email,
       password: req.body.password,
-      phone: req.body.phone
+      phone: req.body.phone,
     };
 
-    const afterUpdate = await User.updateOne({ token: token}, { $set: updateUser });
+    const afterUpdate = await User.updateOne(
+      { token: token },
+      { $set: updateUser }
+    );
     if (!afterUpdate)
       return res.status(200).json({ message: "Not valid user." });
 
-      res.status(201).json({
-        status: "success",
-        message: "User data updated successfully",
-        user: {
-          name,
-          email,
-          phone,
-          password,
-          nationalId,
-          gender,
-          token,
-        },
-      });
+    res.status(201).json({
+      status: "success",
+      message: "User data updated successfully",
+      user: {
+        name,
+        email,
+        phone,
+        password,
+        nationalId,
+        gender,
+        token,
+      },
+    });
   } catch (error) {
     res
-    .status(500)
-    .json({ status: "error", message: error.message, user: null });
+      .status(500)
+      .json({ status: "error", message: error.message, user: null });
   }
 });
 function generateToken() {
