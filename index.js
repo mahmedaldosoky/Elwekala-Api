@@ -185,6 +185,7 @@ app.put("/update", async (req, res) => {
       email: req.body.email,
       password: req.body.password,
       phone: req.body.phone,
+      gender: req.body.gender,
     };
 
     const afterUpdate = await User.updateOne(
