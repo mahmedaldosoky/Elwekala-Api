@@ -133,35 +133,7 @@ app.post("/logout", async (req, res) => {
   }
 });
 
-// app.post("/profile", async (req, res) => {
-//   try {
-//     const { token } = req.body;
-//     const existingUser = await User.findOne({ token });
-//     if (!existingUser)
-//       return res.status(200).json({ message: "Not valid user.", user: null });
-
-//     const { name, email, phone, nationalId, gender } = existingUser;
-
-//     res.status(201).json({
-//       status: "success",
-//       message: "User data returned successfully",
-//       user: {
-//         name,
-//         email,
-//         phone,
-//         nationalId,
-//         gender,
-//         token,
-//       },
-//     });
-//   } catch (error) {
-//     res
-//       .status(500)
-//       .json({ status: "error", message: error.message, user: null });
-//   }
-// });
-
-app.get("/profile", async (req, res) => {
+app.post("/profile", async (req, res) => {
   try {
     const { token } = req.body;
 
@@ -241,6 +213,40 @@ app.put("/update", async (req, res) => {
       .json({ status: "error", message: error.message, user: null });
   }
 });
+
+app.delete("/delete", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res
+        .status(200)
+        .json({ status: "error", message: "Email is required", user: null });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res
+        .status(200)
+        .json({ status: "error", message: "User not found", user: null });
+    }
+
+    await User.deleteOne({ email });
+
+    res.status(200).json({
+      status: "success",
+      message: "User deleted successfully",
+      user: null,
+    });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ status: "error", message: "Server error", user: null });
+  }
+});
+
 function generateToken() {
   return Math.random().toString(36).substr(2) + Date.now().toString(36);
 }
