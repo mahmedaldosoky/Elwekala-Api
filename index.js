@@ -129,7 +129,7 @@ app.post("/logout", async (req, res) => {
       .status(200)
       .json({ status: "success", message: "User logged out successfully" });
   } catch (err) {
-    res.status(500).json({ status: "error", message: err.message });
+    res.status(200).json({ status: "error", message: err.message });
   }
 });
 
@@ -211,7 +211,7 @@ app.put("/update", async (req, res) => {
     });
   } catch (error) {
     res
-      .status(500)
+      .status(200)
       .json({ status: "error", message: error.message, user: null });
   }
 });
@@ -244,7 +244,7 @@ app.delete("/delete", async (req, res) => {
   } catch (err) {
     console.error(err);
     res
-      .status(500)
+      .status(200)
       .json({ status: "error", message: "Server error", user: null });
   }
 });
