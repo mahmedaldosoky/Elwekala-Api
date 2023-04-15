@@ -185,6 +185,7 @@ app.put("/update", async (req, res) => {
       email: req.body.email,
       password: req.body.password,
       phone: req.body.phone,
+      gender: req.body.gender,
     };
 
     const afterUpdate = await User.updateOne(
@@ -246,6 +247,36 @@ app.delete("/delete", async (req, res) => {
       .status(500)
       .json({ status: "error", message: "Server error", user: null });
   }
+});
+
+app.post("/display", async (req, res) => {
+  try {
+    const { isAdmin} = req.body;
+    const admin = await User.findOne({ isAdmin });
+    if (admin === false)
+      return res
+        .status(200)
+        .json({ message: "You are not authorized to view this page" });
+
+    const user = await User.find();
+    
+    if (!user) {
+      return res
+        .status(200)
+        .json({ status: "error", message: "User not found", user: null });
+    }
+    res.status(200).json({
+      status: "success",
+      message: "Users data retrieved successfully",
+      user,
+    });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(200)
+      .json({ status: "error", message: "Server error", user: null });
+  }
+
 });
 
 function generateToken() {
