@@ -194,17 +194,18 @@ app.put("/update", async (req, res) => {
     if (!afterUpdate)
       return res.status(200).json({ message: "Not valid user." });
 
+    existingUser = await User.findOne({ token });
     res.status(201).json({
       status: "success",
       message: "User data updated successfully",
       user: {
-        name,
-        email,
-        phone,
-        password,
-        nationalId,
-        gender,
-        token,
+        name: existingUser.name,
+        email: existingUser.email,
+        phone: existingUser.phone,
+        password: existingUser.password,
+        nationalId: existingUser.nationalId,
+        gender: existingUser.gender,
+        token: existingUser.token,
       },
     });
   } catch (error) {
