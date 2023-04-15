@@ -178,7 +178,7 @@ app.put("/update", async (req, res) => {
     if (!existingUser)
       return res.status(200).json({ message: "Not valid user.", user: null });
 
-    const { name, email, phone, nationalId, gender, password } = existingUser;
+    var { name, email, phone, nationalId, gender, password } = existingUser;
 
     const updateUser = {
       name: req.body.name,
