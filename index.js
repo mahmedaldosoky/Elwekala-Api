@@ -174,7 +174,7 @@ app.post("/profile", async (req, res) => {
 app.put("/update", async (req, res) => {
   try {
     const { token } = req.body;
-    const existingUser = await User.findOne({ token });
+    var existingUser = await User.findOne({ token });
     if (!existingUser)
       return res.status(200).json({ message: "Not valid user.", user: null });
 
@@ -251,7 +251,7 @@ app.delete("/delete", async (req, res) => {
 
 app.post("/display", async (req, res) => {
   try {
-    const { isAdmin} = req.body;
+    const { isAdmin } = req.body;
     const admin = await User.findOne({ isAdmin });
     if (admin === false)
       return res
@@ -259,7 +259,7 @@ app.post("/display", async (req, res) => {
         .json({ message: "You are not authorized to view this page" });
 
     const user = await User.find();
-    
+
     if (!user) {
       return res
         .status(200)
@@ -276,7 +276,6 @@ app.post("/display", async (req, res) => {
       .status(200)
       .json({ status: "error", message: "Server error", user: null });
   }
-
 });
 
 function generateToken() {
