@@ -282,6 +282,32 @@ function generateToken() {
   return Math.random().toString(36).substr(2) + Date.now().toString(36);
 }
 
+//product
+
+app.post("/smartPhone", async (req, res) => {
+    try {
+      const products = await Product.find();
+      
+      if (!products) {
+        return res
+          .status(200)
+          .json({ status: "error", message: "User not found", user: null });
+      }
+      res.status(200).json({
+        status: "success",
+        message: "Users data retrieved successfully",
+        products,
+      });
+    } catch (err) {
+      console.error(err);
+      res
+        .status(200)
+        .json({ status: "error", message: "Server error", user: null });
+    }
+  
+  });
+
+
 app.listen(3000, () => {
   console.log("Server started on http://localhost:3000");
 });
