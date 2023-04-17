@@ -284,6 +284,30 @@ function generateToken() {
 
 //product
 
+app.post('/addProduct', async (req, res) => {
+    const product = new Product({
+        name: req.body.name,
+        price: req.body.price,
+        description: req.body.description,
+        image: req.body.image,
+        // images: req.body.images,
+        company: req.body.company,
+        countInStock: req.body.countInStock,
+    })
+
+    await product.save();
+
+    if(!product)
+    return res.status(201).json({ message: "The product not found" });
+
+    res.status(200).json({
+        status: "success",
+        message: "Product data retrieved successfully",
+        product,
+      });
+
+});
+
 app.post("/smartPhone", async (req, res) => {
     try {
       const products = await Product.find();
