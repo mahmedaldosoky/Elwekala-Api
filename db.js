@@ -63,3 +63,47 @@ const userSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model("User", userSchema);
+
+//product schema
+
+const productSchema = mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+  price: {
+    type: Number,
+    required: true,
+  },
+  description: {
+    type: String,
+    required: true,
+    
+  },
+  image: {
+    type: String,
+    default:''
+  },
+//  images: [{
+//     type: String,
+//  }],
+ company: {
+    type: String,
+ },
+ countInStock: {
+    type: Number,
+    required: true,
+    min:0,
+    max:500,
+ },
+ inCart: {
+    type: Boolean,
+    default: false,
+ },
+favorite: {
+    type: Boolean,
+    default: false,
+ },
+});
+
+export default mongoose.model("Product", productSchema);
