@@ -48,22 +48,16 @@ const userSchema = mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  // favProducts: [{
-  //   _Id:{
-  //     type: mongoose.Schema.Types.ObjectId,
-  //     ref: "Product",
-  //   },
-  //   type: Boolean,
-  //   default: false,
-  //    }],
-  inCart:[{
-   product_Id:{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Product",
-    },
-    type: String,
-     
-     }],
+  favoriteProducts: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Product",
+    unique: true,
+  }],
+  inCart: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Product",
+    unique: true,
+  }],
 });
 
 // userSchema.virtual('id').get(function () {
