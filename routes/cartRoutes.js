@@ -12,19 +12,27 @@ const app = express.Router();
 //add cart items
 
 app.post("/", async (req, res) => {
-   
-        let userId = req.body.userId;
-        let user = await User.exists({ _id: userId });
+  const { email, productId } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  if (user.inCart.includes(productId)) {
+    return res.status(400).json({ message: "Product already added" });
+  }
+
+  const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+        // let productId = req.body.productId;
+        // let product = await Product.exists({ _id: productId });
+        // if (!productId || !product)
+        //   return res.status(400).send({ status: false, message: "Invalid product" });
       
-        if (!userId || !user)
-          return res.status(400).send({ status: false, message: "Invalid user ID" });
-      
-        let productId = req.body.productId;
-        let product = await Product.exists({ _id: productId });
-        if (!productId || !product)
-          return res.status(400).send({ status: false, message: "Invalid product" });
-      
-        let cart = await Cart.findOne({ userId: userId });
+        const cart = await Cart.findOne({ email});
       
         if (cart) {
           let itemIndex = cart.products.findIndex((p) => p.productId == productId);
@@ -40,7 +48,7 @@ app.post("/", async (req, res) => {
           return res.status(200).send({ status: true, updatedCart: cart });
         } else {
           const newCart = await Cart.create({
-            userId,
+            email,
             products: [{ productId: productId, quantity: 1 }],
           });
       
@@ -52,13 +60,15 @@ app.post("/", async (req, res) => {
   //get cart data
 app.get("/", async (req, res) => {
    
-        let userId = req.params.userId;
-        let user = await User.exists({ _id: userId });
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
       
-        if (!userId || !isValidObjectId(userId) || !user)
-          return res.status(400).send({ status: false, message: "Invalid user ID" });
-      
-        let cart = await Cart.findOne({ userId: userId });
+        let cart = await Cart.findOne({ email});
         if (!cart)
           return res
             .status(404)
@@ -72,14 +82,14 @@ app.get("/", async (req, res) => {
 
   app.patch("/", async (req, res) => {
     // use add product endpoint for increase quantity
-    let userId = req.params.userId;
-    let user = await User.exists({ _id: userId });
-    let productId = req.body.productId;
+    const { email, productId } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
   
-    if (!userId || !isValidObjectId(userId) || !user)
-      return res.status(400).send({ status: false, message: "Invalid user ID" });
-  
-    let cart = await Cart.findOne({ userId: userId });
+    let cart = await Cart.findOne({ email });
     if (!cart)
       return res
         .status(404)
@@ -102,14 +112,15 @@ app.get("/", async (req, res) => {
 
 // removeItem 
   app.delete("/", async (req, res) => {
-    let userId = req.params.userId;
-    let user = await User.exists({ _id: userId });
-    let productId = req.body.productId;
+    const { email, productId } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
   
-    if (!userId || !isValidObjectId(userId) || !user)
-      return res.status(400).send({ status: false, message: "Invalid user ID" });
   
-    let cart = await Cart.findOne({ userId: userId });
+    let cart = await Cart.findOne({ email});
     if (!cart)
       return res
         .status(404)

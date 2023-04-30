@@ -45,15 +45,7 @@ app.get("/:category", async (req, res) => {
     if (!product) {
       res.status(500).json({ success: false });
     }
-    var {inCart} = req.body;
-    const Product_id = await Product.findById(req.body.id);
-    const in_Cart = await User.find(req.body.product_Id);
-
-if(Product_id === in_Cart){
-  return res.status(201).json({
-    in_Cart: {inCart},
-  });
-}
+    
     res.status(200).json({
       status: "success",
       message: "All products data retrieved successfully",

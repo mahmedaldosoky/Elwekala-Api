@@ -1,7 +1,6 @@
 import express from "express";
 import * as dotenv from "dotenv";
 
-import Cart from "../mongodb/models/cart.js";
 import Product from "../mongodb/models/product.js";
 import User from "../mongodb/models/user.js";
 
