@@ -48,24 +48,18 @@ const userSchema = mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  favoriteProducts: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Product",
-    unique: true,
-  }],
-  inCart: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Product",
-    unique: true,
-  }],
+  favoriteProducts: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
+      unique: true,
+    },
+  ],
+  // inCart: [{
+  //   type: mongoose.Schema.Types.ObjectId,
+  //   ref: "Product",
+  //   unique: true,
+  // }],
 });
-
-// userSchema.virtual('id').get(function () {
-//   return this._id.toHexString();
-// });
-
-// userSchema.set('toJSON', {
-//   virtuals: true,
-// });
 
 export default mongoose.model("User", userSchema);

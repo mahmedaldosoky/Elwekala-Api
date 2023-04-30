@@ -3,8 +3,6 @@ import * as dotenv from "dotenv";
 
 import Category from "../mongodb/models/category.js";
 import Product from "../mongodb/models/product.js";
-// import Cart from "../mongodb/models/cart.js";
-import User from "../mongodb/models/user.js";
 
 dotenv.config();
 
@@ -45,7 +43,7 @@ app.get("/:category", async (req, res) => {
     if (!product) {
       res.status(500).json({ success: false });
     }
-    
+
     res.status(200).json({
       status: "success",
       message: "All products data retrieved successfully",
@@ -73,8 +71,6 @@ app.post("/", async (req, res) => {
       countInStock: req.body.countInStock,
       image: req.body.image,
       quantity: req.body.quantity,
-      // favorite: req.body.favorite,
-      // inCart: req.body.inCart,
     });
 
     product = await product.save();
@@ -172,89 +168,3 @@ app.get(`/get/count`, async (req, res) => {
 });
 
 export default app;
-
-// app.post('/addProduct', async (req, res) => {
-//     const category = await Category.findById(req.body.category);
-
-//     if(!category)
-//     return res.status(201).json({ message: "The category not found" });
-
-//     const product = new Product({
-//         category: req.body.category,
-//         name: req.body.name,
-//         price: req.body.price,
-//         description: req.body.description,
-//         image: req.body.image,
-//         // images: req.body.images,
-//         company: req.body.company,
-//         countInStock: req.body.countInStock,
-//     })
-
-//     await product.save();
-
-//     if(!product)
-//     return res.status(201).json({ message: "The product not found" });
-
-//     res.status(200).json({
-//         status: "success",
-//         message: "Product data retrieved successfully",
-//         product,
-//       });
-
-// });
-
-// app.post("/display", async (req, res) => {
-//     try {
-//       const products = await Product.find().populate('category');
-
-//       if (!products) {
-//         return res
-//           .status(200)
-//           .json({ status: "error", message: "User not found", user: null });
-//       }
-//       res.status(200).json({
-//         status: "success",
-//         message: "Users data retrieved successfully",
-//         products,
-//       });
-//     } catch (err) {
-//       console.error(err);
-//       res
-//         .status(200)
-//         .json({ status: "error", message: "Server error", user: null });
-//     }
-
-//   });
-
-//   app.delete('/delete', async(req, res) => {
-//     try {
-//         const { _id } = req.body;
-
-//         if (!_id) {
-//           return res
-//             .status(200)
-//             .json({ status: "error", message: "ID is required", user: null });
-//         }
-
-//         const product = await Product.findOne({ _id });
-
-//         if (!product) {
-//           return res
-//             .status(200)
-//             .json({ status: "error", message: "Product not found", user: null });
-//         }
-
-//         await Product.deleteOne({ _id });
-
-//         res.status(200).json({
-//           status: "success",
-//           message: "Category deleted successfully",
-//           product: null,
-//         });
-//       } catch (err) {
-//         console.error(err);
-//         res
-//           .status(200)
-//           .json({ status: "error", message: "Server error", user: null });
-//       }
-// });
