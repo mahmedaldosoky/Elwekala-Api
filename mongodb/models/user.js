@@ -61,8 +61,8 @@ const userSchema = mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: "Product",
     },
-    type: Boolean,
-    default: false,
+    type: String,
+     
      }],
 });
 
