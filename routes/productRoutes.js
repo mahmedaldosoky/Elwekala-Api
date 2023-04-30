@@ -3,7 +3,7 @@ import * as dotenv from "dotenv";
 
 import Category from "../mongodb/models/category.js";
 import Product from "../mongodb/models/product.js";
-import Cart from "../mongodb/models/cart.js";
+// import Cart from "../mongodb/models/cart.js";
 import User from "../mongodb/models/user.js";
 
 dotenv.config();
@@ -72,6 +72,7 @@ app.post("/", async (req, res) => {
       category: req.body.category,
       countInStock: req.body.countInStock,
       image: req.body.image,
+      quantity: req.body.quantity,
       // favorite: req.body.favorite,
       // inCart: req.body.inCart,
     });
@@ -111,8 +112,7 @@ app.put("/:id", async (req, res) => {
         category: req.body.category,
         countInStock: req.body.countInStock,
         image: req.body.image,
-        favorite: req.body.favorite,
-        inCart: req.body.inCart,
+        quantity: req.body.quantity,
       },
       { new: true }
     );

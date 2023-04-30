@@ -29,6 +29,10 @@ const productSchema = mongoose.Schema({
  company: {
     type: String,
  },
+ quantity: {
+  type: Number,
+  default: 1,
+ },
  countInStock: {
     type: Number,
     required: true,
