@@ -1,9 +1,12 @@
-const express = require("express");
-const bcrypt = require("bcrypt");
-const User = require("./db");
+import express from "express";
+import * as dotenv from "dotenv";
+import bcrypt from "bcryptjs";
 
-const app = express();
-app.use(express.json());
+import User from "../mongodb/models/user.js";
+
+dotenv.config();
+
+const app = express.Router();
 
 app.post("/register", async (req, res) => {
   try {
