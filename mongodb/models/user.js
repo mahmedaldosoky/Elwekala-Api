@@ -55,11 +55,11 @@ const userSchema = mongoose.Schema({
       unique: true,
     },
   ],
-  // inCart: [{
+  //  cart: [{
   //   type: mongoose.Schema.Types.ObjectId,
-  //   ref: "Product",
-  //   unique: true,
-  // }],
+  //   ref: "Cart",
+  //    unique: true,
+  //  }],
 });
 
 export default mongoose.model("User", userSchema);

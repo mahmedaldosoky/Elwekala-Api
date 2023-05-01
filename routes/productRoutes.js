@@ -70,7 +70,7 @@ app.post("/", async (req, res) => {
       category: req.body.category,
       countInStock: req.body.countInStock,
       image: req.body.image,
-      quantity: req.body.quantity,
+      status: req.body.status,
     });
 
     product = await product.save();
@@ -108,7 +108,7 @@ app.put("/:id", async (req, res) => {
         category: req.body.category,
         countInStock: req.body.countInStock,
         image: req.body.image,
-        quantity: req.body.quantity,
+        status: req.body.status,
       },
       { new: true }
     );
