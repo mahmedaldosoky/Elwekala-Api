@@ -36,3 +36,4 @@ app.delete("/", async (req, res) => {
   );
   res.json(cart);
 });
+export default app;
