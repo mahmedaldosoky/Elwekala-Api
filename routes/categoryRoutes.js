@@ -15,7 +15,7 @@ app.get("/", async (req, res) => {
     }
     res.status(200).json({
       status: "success",
-      message: "Users data retrieved successfully",
+      message: "category data retrieved successfully",
       categoryList,
     });
   } catch (err) {

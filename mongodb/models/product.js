@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 
 const productSchema = mongoose.Schema({
+  status: {
+    type: String,
+    required: true,
+  },
   category: {
     type: mongoose.Schema.Types.String,
     ref: "category",
@@ -27,10 +31,6 @@ const productSchema = mongoose.Schema({
   //  }],
   company: {
     type: String,
-  },
-  quantity: {
-    type: Number,
-    default: 1,
   },
   countInStock: {
     type: Number,
