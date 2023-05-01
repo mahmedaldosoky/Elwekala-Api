@@ -8,49 +8,59 @@ dotenv.config();
 
 const app = express.Router();
 
-// add to user 's favorite products
+// add to user's favorite products
 app.post("/", async (req, res) => {
-  const { email, productId } = req.body;
+  const { nationalId, productId } = req.body;
 
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ nationalId });
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res
+        .status(200)
+        .json({ status: "failure", message: "User not found" });
     }
 
     if (user.favoriteProducts.includes(productId)) {
-      return res.status(400).json({ message: "Product already added" });
+      return res
+        .status(200)
+        .json({ status: "failure", message: "Product already added" });
     }
 
     const product = await Product.findById(productId);
     if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+      return res
+        .status(200)
+        .json({ status: "failure", message: "Product not found" });
     }
 
     user.favoriteProducts.push(productId);
     await user.save();
 
-    res.status(200).json({ message: "Product added to favorites" });
+    res
+      .status(200)
+      .json({ status: "success", message: "Product added to favorites" });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Server error" });
+    res.status(200).json({ status: "failure", message: "Server error" });
   }
 });
 
 // remove from favorite products
 app.delete("/", async (req, res) => {
-  const { email, productId } = req.body;
+  const { nationalId, productId } = req.body;
 
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ nationalId });
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res
+        .status(404)
+        .json({ status: "failure", message: "User not found" });
     }
 
-    if (!user.favoriteProducts.includes(productId)) {
+    if (!user.favoriteProducts || !user.favoriteProducts.includes(productId)) {
       return res
         .status(400)
-        .json({ message: "Product not found in favorites" });
+        .json({ status: "failure", message: "Product not found in favorites" });
     }
 
     user.favoriteProducts = user.favoriteProducts.filter(
@@ -58,31 +68,35 @@ app.delete("/", async (req, res) => {
     );
     await user.save();
 
-    res.status(200).json({ message: "Product removed from favorites" });
+    res
+      .status(200)
+      .json({ status: "success", message: "Product removed from favorites" });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ status: "failure", message: "Server error" });
   }
 });
 
-// get all user 's favorite products
+// get all user's favorite products
 app.get("/", async (req, res) => {
-  const { email } = req.body;
+  const { nationalId } = req.body;
 
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ nationalId });
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res
+        .status(200)
+        .json({ status: "failure", message: "User not found" });
     }
 
     const favoriteProducts = await Product.find({
       _id: { $in: user.favoriteProducts },
     });
 
-    res.status(200).json({ favoriteProducts });
+    res.status(200).json({ status: "success", favoriteProducts });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Server error" });
+    res.status(200).json({ status: "failure", message: "Server error" });
   }
 });
 
