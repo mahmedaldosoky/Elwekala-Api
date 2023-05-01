@@ -2,7 +2,7 @@ import express from "express";
 import * as dotenv from "dotenv";
 
 import Cart from "../mongodb/models/cart.js";
-import User from "../mongodb/models/user.js";
+// import User from "../mongodb/models/user.js";
 
 dotenv.config();
 
