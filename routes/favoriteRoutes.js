@@ -16,20 +16,20 @@ app.post("/", async (req, res) => {
     const user = await User.findOne({ nationalId });
     if (!user) {
       return res
-        .status(404)
+        .status(200)
         .json({ status: "failure", message: "User not found" });
     }
 
     if (user.favoriteProducts.includes(productId)) {
       return res
-        .status(400)
+        .status(200)
         .json({ status: "failure", message: "Product already added" });
     }
 
     const product = await Product.findById(productId);
     if (!product) {
       return res
-        .status(404)
+        .status(200)
         .json({ status: "failure", message: "Product not found" });
     }
 
@@ -41,7 +41,7 @@ app.post("/", async (req, res) => {
       .json({ status: "success", message: "Product added to favorites" });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ status: "failure", message: "Server error" });
+    res.status(200).json({ status: "failure", message: "Server error" });
   }
 });
 
@@ -53,13 +53,13 @@ app.delete("/", async (req, res) => {
     const user = await User.findOne({ nationalId });
     if (!user) {
       return res
-        .status(404)
+        .status(200)
         .json({ status: "failure", message: "User not found" });
     }
 
     if (!user.favoriteProducts.includes(productId)) {
       return res
-        .status(400)
+        .status(200)
         .json({ status: "failure", message: "Product not found in favorites" });
     }
 
@@ -73,7 +73,7 @@ app.delete("/", async (req, res) => {
       .json({ status: "success", message: "Product removed from favorites" });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ status: "failure", message: "Server error" });
+    res.status(200).json({ status: "failure", message: "Server error" });
   }
 });
 
@@ -85,7 +85,7 @@ app.get("/", async (req, res) => {
     const user = await User.findOne({ nationalId });
     if (!user) {
       return res
-        .status(404)
+        .status(200)
         .json({ status: "failure", message: "User not found" });
     }
 
@@ -96,7 +96,7 @@ app.get("/", async (req, res) => {
     res.status(200).json({ status: "success", favoriteProducts });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ status: "failure", message: "Server error" });
+    res.status(200).json({ status: "failure", message: "Server error" });
   }
 });
 
