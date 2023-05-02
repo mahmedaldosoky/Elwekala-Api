@@ -57,7 +57,7 @@ app.get('/allProducts', async (req, res) => {
   }
 });
 
-app.delete('/', (req, res, next) => {
+app.delete('/delete', (req, res, next) => {
   const { userId, productId } = req.body;
 
   User.updateOne({ _id: userId }, { $pull: { incart: { product: productId } } })
