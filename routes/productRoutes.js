@@ -79,7 +79,7 @@ app.post("/", async (req, res) => {
 
     res.status(200).json({
       status: "success",
-      message: "category data retrieved successfully",
+      message: "Product data retrieved successfully",
       product,
     });
   } catch (err) {
