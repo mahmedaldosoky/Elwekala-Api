@@ -3,60 +3,80 @@ import * as dotenv from "dotenv";
 
 // import Cart from "../mongodb/models/cart.js";
 import User from "../mongodb/models/user.js";
-
+import Product from "../mongodb/models/product.js";
 dotenv.config();
 
 const app = express.Router();
 
 // Add product to cart
-app.post('/add', async (req, res) => {
+app.post("/add", async (req, res) => {
   const { nationalId, productId, quantity } = req.body;
+
   try {
-    const user = await User.findOne({nationalId});
+    // Find the user by their national ID
+    const user = await User.findOne({ nationalId });
+
+    // Check if the user exists
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
-    const existingProductIndex = user.inCart.findIndex((id) => id.toString() === productId);
-    if (existingProductIndex !== -1) {
-      user.inCart[existingProductIndex].quantity += quantity;
+    // Find the product by its ID
+    const product = await Product.findById(productId);
+
+    // Check if the product exists
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // Check if the product is already in the user's cart
+    const existingItem = user.inCart.find(
+      (item) => item.product.toString() === productId
+    );
+
+    if (existingItem) {
+      // If the product already exists, update the quantity
+      existingItem.quantity += parseInt(quantity, 10);
     } else {
-      user.inCart.push({ product: productId, quantity: quantity });
+      // If the product is not already in the cart, add it as a new item
+      const newItem = {
+        product: product._id,
+        quantity: parseInt(quantity, 10),
+      };
+      user.inCart.push(newItem);
     }
 
+    // Save the updated user document
     await user.save();
 
-   res.status(200).json({
-     status: "success",
-     message: "Product added to cart",
-     inCart: user.inCart
-  });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: 'Internal server error' });
+    return res
+      .status(200)
+      .json({ message: "Product added to cart successfully", user });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Internal server error" });
   }
 });
 
-app.get('/allProducts', async (req, res) => {
+app.get("/allProducts", async (req, res) => {
   const { nationalId } = req.body;
 
   try {
-    const user = await User.findOne({nationalId});
+    const user = await User.findOne({ nationalId });
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
     res.status(200).json({
       status: "success",
       message: "All Products ",
-      inCart: user.inCart
-   });
+      inCart: user.inCart,
+    });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: "Internal server error" });
   }
 });
-
 
 // app.delete('/delete', async (req, res) => {
 //   try {
@@ -95,9 +115,8 @@ app.get('/allProducts', async (req, res) => {
 app.delete("/", async (req, res) => {
   const { nationalId, productId } = req.body;
 
-
   try {
-    const user = await User.findOne({nationalId});
+    const user = await User.findOne({ nationalId });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -119,7 +138,6 @@ app.delete("/", async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 });
-
 
 // delete route to remove product from inCart array in user schema nodejs and mongodb
 // app.delete('/', async (req, res) => {
@@ -178,7 +196,6 @@ app.delete("/", async (req, res) => {
 //     });
 // });
 export default app;
-
 
 // Add product to cart
 // app.post("/add", async (req, res) => {
