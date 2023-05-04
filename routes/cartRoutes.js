@@ -88,9 +88,77 @@ app.get('/allProducts', async (req, res) => {
 });
 
 
+app.put('/', async (req, res) => {
+  try {
+    const nationalId = req.body.nationalId;
+    const productId = req.body.productId;
+    const newQuantity = req.body.quantity;
 
+    // Find the user by their national ID
+    const user = await User.findOne({ nationalId }).populate('inCart.product');
 
+    // Check if the user exists
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
 
+    // Find the product in the user's cart
+    const cartItem = user.inCart.find(item => item.product._id.toString() === productId);
+
+    // Check if the product is in the user's cart
+    if (!cartItem) {
+      return res.status(404).json({ message: 'Product not found in cart' });
+    }
+
+    // Update the quantity of the product
+    cartItem.quantity = parseInt(newQuantity);
+
+    // Save the updated user object
+    await user.save();
+
+    // Calculate the total price and quantity of the updated product
+    const product = cartItem.product;
+    const totalPrice = product.price * cartItem.quantity;
+    const updatedCartItem = {
+      ...product.toObject(),
+      quantity: cartItem.quantity,
+      totalPrice,
+    };
+
+    return res.status(200).json({ product: updatedCartItem });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// GET /cart/total route to get the total price of all products in the cart
+app.get('/total', async (req, res) => {
+  try {
+    const nationalId = req.body.nationalId;
+
+    // Find the user by their national ID
+    const user = await User.findOne({ nationalId }).populate('inCart.product');
+
+    // Check if the user exists
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Calculate the total price of all products in the cart
+    let totalPrice = 0;
+    user.inCart.forEach(item => {
+      const product = item.product;
+      const itemTotalPrice = product.price * item.quantity;
+      totalPrice += itemTotalPrice;
+    });
+
+    return res.status(200).json({ totalPrice });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
 
 // app.get("/allProducts", async (req, res) => {
 //   const { nationalId } = req.body;
@@ -147,7 +215,7 @@ app.get('/allProducts', async (req, res) => {
 //   }
 // });
 
-app.delete("/", async (req, res) => {
+app.delete("/delete", async (req, res) => {
   const { nationalId, productId } = req.body;
 
   try {
