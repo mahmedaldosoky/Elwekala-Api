@@ -10,9 +10,9 @@ const app = express.Router();
 
 // Add product to cart
 app.post('/add', async (req, res) => {
-  const { userId, productId, quantity } = req.body;
+  const { nationalId, productId, quantity } = req.body;
   try {
-    const user = await User.findOne({userId});
+    const user = await User.findOne({nationalId});
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -38,10 +38,10 @@ app.post('/add', async (req, res) => {
 });
 
 app.get('/allProducts', async (req, res) => {
-  const { userId } = req.body;
+  const { nationalId } = req.body;
 
   try {
-    const user = await User.findOne({userId});
+    const user = await User.findOne({nationalId});
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -57,23 +57,126 @@ app.get('/allProducts', async (req, res) => {
   }
 });
 
-app.delete('/delete', (req, res, next) => {
-  const { userId, productId } = req.body;
 
-  User.updateOne({ _id: userId }, { $pull: { incart: { product: productId } } })
-    .then(result => {
+// app.delete('/delete', async (req, res) => {
+//   try {
+//     const { nationalId, productId } = req.body;
 
-      res.status(200).json({
-        status: "success",
-        message: "Product removed to cart",
-     });
-    })
-    .catch(err => {
-      res.status(500).json({
-        error: err
-      });
-    });
+//     // Find the user by ID
+//     const user = await User.findOne({ nationalId });
+//     if (!user) {
+//       return res.status(404).json({ message: 'User not found' });
+//     }
+
+//     // Remove the product from the inCart array
+//     const cartIndex = user.inCart.indexOf(productId);
+//     if (cartIndex !== -1) {
+//       user.inCart.splice(cartIndex, 1);
+//     }
+
+//     // Save the updated user object
+//     const updatedUser = await user.save();
+//     if (!updatedUser) {
+//       return res.status(500).json({ message: 'Failed to update user' });
+//     }
+
+//     // res.status(200).json({ message: 'Product removed from cart' });
+//     res.status(200).json({
+//       status: "success",
+//       message: "Product removed from cart",
+//       inCart: user.inCart
+//    });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// });
+
+app.delete("/", async (req, res) => {
+  const { nationalId, productId } = req.body;
+
+
+  try {
+    const user = await User.findOne({nationalId});
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const cartItemIndex = user.inCart.findIndex(
+      (item) => item.product.toString() === productId
+    );
+    if (cartItemIndex === -1) {
+      return res.status(404).json({ message: "Product not found in cart" });
+    }
+
+    user.inCart.splice(cartItemIndex, 1);
+
+    const updatedUser = await user.save();
+
+    res.status(200).json(updatedUser.inCart);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server Error" });
+  }
 });
+
+
+// delete route to remove product from inCart array in user schema nodejs and mongodb
+// app.delete('/', async (req, res) => {
+//   const { nationalId, productId } = req.body;
+
+//   try {
+//     const user = await User.findOne({nationalId});
+
+//     if (!user) {
+//       return res.status(404).json({ message: 'User not found' });
+//     }
+// console.log(user.nationalId);
+//   //  const incartIndex = user.inCart.findIndex((id) => id.toString() === productId);
+//   //   if (incartIndex === -1) {
+//   //     return res.status(404).json({ message: 'Product not found in cart' });
+//   //   }
+//   console.log(user.inCart);
+// console.log(productId);
+//   if (!user.inCart || !user.inCart.includes(productId)) {
+//     return res
+//       .status(200)
+//       .json({ status: "failure", message: "Product not found in cart" });
+//   }
+// console.log(productId);
+//     // user.incart.splice(incartIndex, 1);
+
+//     user.inCart = user.inCart.filter(
+//       (id) => id.toString() !== productId
+//     );
+//     console.log("saccccccccccccccccccccccccccccc");
+// console.log(productId);
+//     await user.save();
+//     console.log(user.inCart);
+
+//     return res.json(user.inCart);
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({ message: 'Internal server error' });
+//   }
+// });
+// app.delete('/delete', (req, res) => {
+//   const { userId, productId } = req.body;
+
+//   User.updateOne({ _id: userId }, { $pull: { incart: { product: productId } } })
+//     .then(result => {
+
+//       res.status(200).json({
+//         status: "success",
+//         message: "Product removed to cart",
+//      });
+//     })
+//     .catch(err => {
+//       res.status(500).json({
+//         error: err
+//       });
+//     });
+// });
 export default app;
 
 
