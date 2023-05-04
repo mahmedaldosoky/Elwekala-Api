@@ -58,25 +58,60 @@ app.post("/add", async (req, res) => {
   }
 });
 
-app.get("/allProducts", async (req, res) => {
-  const { nationalId } = req.body;
-
+// GET /cart route to get all products in cart with total price
+app.get('/allProducts', async (req, res) => {
   try {
-    const user = await User.findOne({ nationalId });
+    // Find the user by their national ID
+    const user = await User.findOne({ nationalId: req.body.nationalId }).populate('inCart.product');
+
+    // Check if the user exists
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: 'User not found' });
     }
 
-    res.status(200).json({
-      status: "success",
-      message: "All Products ",
-      inCart: user.inCart,
+    // Calculate the total price and quantity of each product in the user's cart
+    const cartItems = user.inCart.map(item => {
+      const product = item.product;
+      const totalPrice = product.price * item.quantity;
+      return {
+        ...product.toObject(),
+        quantity: item.quantity,
+        totalPrice,
+      };
     });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error" });
+
+    return res.status(200).json({ products: cartItems });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 });
+
+
+
+
+
+
+// app.get("/allProducts", async (req, res) => {
+//   const { nationalId } = req.body;
+
+//   try {
+//     const user = await User.findOne({ nationalId });
+//     if (!user) {
+//       return res.status(404).json({ message: "User not found" });
+//     }
+
+    
+//     res.status(200).json({
+//       status: "success",
+//       message: "All Products ",
+//       inCart: user.inCart,
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({ message: "Internal server error" });
+//   }
+// });
 
 // app.delete('/delete', async (req, res) => {
 //   try {
