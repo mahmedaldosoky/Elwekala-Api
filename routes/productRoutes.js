@@ -167,4 +167,26 @@ app.get(`/get/count`, async (req, res) => {
   }
 });
 
+app.get("/get/search", async (req, res) => {
+  try {
+    const { keyword } = req.body;
+    const products = await Product.find({
+      $or: [
+        { name: { $regex: keyword, $options: "i" } },
+        { description: { $regex: keyword, $options: "i" } },
+      ],
+    });
+    res.status(200).json({
+      status: "success",
+      message: products.length > 0 ? "products retrieved successfully":"no products were found",
+      products: products,
+    });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(200)
+      .json({ status: "error", message: "Server error", products: null });
+  }
+});
+
 export default app;
