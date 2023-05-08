@@ -66,7 +66,6 @@ app.delete("/", async (req, res) => {
     user.favoriteProducts = user.favoriteProducts.filter(
       (id) => id.toString() !== productId
     );
-    console.log("saccccccccccccccccccccccccccccc");
     await user.save();
 
     res
@@ -95,6 +94,26 @@ app.get("/", async (req, res) => {
     });
 
     res.status(200).json({ status: "success", favoriteProducts });
+  } catch (error) {
+    console.log(error);
+    res.status(200).json({ status: "failure", message: "Server error" });
+  }
+});
+
+// check if product is in user's favorite products
+app.get("/isfavorite", async (req, res) => {
+  const { nationalId, productId } = req.body;
+
+  try {
+    const user = await User.findOne({ nationalId });
+    if (!user) {
+      return res
+        .status(200)
+        .json({ status: "failure", message: "User not found" });
+    }
+
+    const isFavorite = user.favoriteProducts.includes(productId);
+    res.status(200).json({ status: "success", isFavorite });
   } catch (error) {
     console.log(error);
     res.status(200).json({ status: "failure", message: "Server error" });
