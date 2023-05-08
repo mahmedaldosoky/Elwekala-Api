@@ -194,6 +194,37 @@ app.get("/", async (req, res) => {
   }
 });
 
+
+// get one product by Id
+app.get("/:id", async (req, res) => {
+  
+  try {
+    const product = await Product.findOne(req.params.id);
+
+    if (!product) {
+      return res.status(404).json({
+        status: "error",
+        message: "No products found ",
+        products: null,
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      message: "Products retrieved successfully",
+      product,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      status: "error",
+      message: "Server error",
+      product: null,
+    });
+  }
+});
+
+
 // // Update product route with image upload
 // app.patch( "/update",
 // uploadOptions.single('image'), // specify the name of the image field in the request body
