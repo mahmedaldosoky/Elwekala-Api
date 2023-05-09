@@ -13,6 +13,7 @@ const userSchema = mongoose.Schema({
   phone: {
     type: String,
     required: true,
+    unique: true,
     validate: {
       validator: function (phone) {
         return /^01\d{9}$/.test(phone);
