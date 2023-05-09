@@ -4,117 +4,142 @@ import * as dotenv from "dotenv";
 import Category from "../mongodb/models/category.js";
 import Product from "../mongodb/models/product.js";
 
-//import multer from "multer";
-// const multer = require("multer");
-// import base64Img from 'base64-img';
+//image imports
+import cloudinary from "cloudinary";
+import fs from "fs";
+import { promisify } from "util";
+
 dotenv.config();
 
 const app = express.Router();
 
-// app.post("/add", async (req, res) => {
-//   const { name, price, description, company, countInStock, status, image } = req.body;
-//   let {category} = req.body;
-//   try {
-//      category = await Category.find(req.params.category);
-//     if (!category) return res.status(400).send("Invalid Category");
 
-//     const imagePath = base64Img.imgSync(image, '', 'uploads'); // convert the base64 image to a link and save it in the 'uploads' folder
+// configure cloudinary
+cloudinary.config({
+  cloud_name: 'dzh2hde2n',
+  api_key: '692425944689747',
+  api_secret: 'WPWBWEFlS8DZ3ND9oohrQQ7A9DM'
+});
 
-//     const product = new Product({
-//       status,
-//       category,
-//       name,
-//       description,
-//       price,
-//       company,
-//       image: imagePath,
-//       countInStock,
-//     });
+// helper function to promisify fs.writeFile
+const writeFile = promisify(fs.writeFile);
 
-//     const savedProduct = await product.save();
-//     if (!savedProduct) return res.status(500).send("The product cannot be created");
+//add product
+app.post('/add', async (req, res) => {
+  const { name, price, description, company, countInStock, status, category, image } = req.body;
 
-//     res.status(200).json({
-//       status: "success",
-//       message: "Product data retrieved successfully",
-//       product: savedProduct,
-//     });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(200).json({ status: "error", message: "Server error", product: null });
-//   }
-// });
+  let imagePath = '';
 
-// const FILE_TYPE_MAP = {
-//   'image/png': 'png',
-//   'image/jpeg': 'jpeg',
-//   'image/jpg': 'jpg'
-// }
+  try {
+  //  Find category by name
+     const categoryDoc = await Category.findOne({ name: category });
+     if (!categoryDoc) return res.status(400).send('Invalid Category');
 
-// const storage = multer.diskStorage({
-//   destination: function (req, file, cb) {
-//       const isValid = FILE_TYPE_MAP[file.mimetype];
-//       let uploadError = new Error('invalid image type');
+    // decode base64 image data and write to file
+    const buffer = Buffer.from(image.split(';base64,').pop(), 'base64');
+    const fileName = `${Date.now()}.png`;
+    const imagePath = `public/uploads/${fileName}`;
+    await writeFile(imagePath, buffer);
 
-//       if(isValid) {
-//           uploadError = null
-//       }
-//     cb(uploadError, 'public/uploads')
-//   },
-//   filename: function (req, file, cb) {
-      
-//     const fileName = file.originalname.split(' ').join('-');
-//     const extension = FILE_TYPE_MAP[file.mimetype];
-//     cb(null, `${fileName}-${Date.now()}.${extension}`)
-//   }
-// })
+    // upload image to cloudinary
+    const uploadedImage = await cloudinary.uploader.upload(imagePath, {
+      folder: 'product-images',
+      allowedFormats: ['jpg', 'png'],
+      transformation: [{ width: 500, height: 500, crop: 'limit' }]
+    });
 
-// const uploadOptions = multer({ storage: storage })
+    // create product object with cloudinary image URL
+    const product = new Product({
+      status,
+      category,
+      name,
+      description,
+      price,
+      company,
+      image: uploadedImage.secure_url,
+      countInStock,
+    });
 
-// add product
-// app.post("/add", uploadOptions.single('image'),  async (req, res) => {
-//   const { name, price, description, company, countInStock, status} = req.body;
-//   let {category} = req.body;
-  
-//   try {
-//    category = await Category.find({category});
-//     if (!category) return res.status(400).send("Invalid Category");
+    await product.save();
 
-//     const file = req.file;
-//     if(!file) return res.status(400).send('No image in the request')
+    res.status(200).json({
+      status: 'success',
+      message: 'Product data retrieved successfully',
+      product,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ status: 'error', message: 'Server error' });
+  } finally {
+    // delete the uploaded file from the server
+    if (imagePath) {
+      fs.unlink(imagePath, (err) => {
+        if (err) console.error(err);
+      });
+    }
+  }
+});
 
-//     const fileName = file.filename
-//     const basePath = `${req.protocol}://${req.get('host')}/public/uploads/`;
+//update product
 
-//     const product = new Product({
-//       status,
-//       category,
-//       name,
-//       description,
-//       price,
-//       company,
-//       image: `${basePath}${fileName}`,// save the path of the uploaded image to the image field in the product schema
-//       // images: req.body.images.split(","),
-//       countInStock,
-//       status,
-//     });
+app.put('/update/:id', async (req, res) => {
+  const { name, price, description, company, countInStock, status, category, image } = req.body;
+  const productId = req.params.id;
 
-//     product = await product.save();
+  try {
+    const product = await Product.findById(productId);
+    if (!product) return res.status(400).send('Invalid Product ID');
 
-//     if (!product) return res.status(500).send("The product cannot be created");
+     //  Find category by name
+     const categoryDoc = await Category.findOne({ name: category });
+     if (!categoryDoc) return res.status(400).send('Invalid Category');
 
-//     res.status(200).json({
-//       status: "success",
-//       message: "Product data retrieved successfully",
-//       product,
-//     });
-//   } catch (err) {
-//     console.error(err);
-//     res
-//       .status(200)
-//       .json({ status: "error", message: "Server error", product: null });
-//   }
-// });
+    let updatedProduct = {
+      status,
+      category,
+      name,
+      description,
+      price,
+      company,
+      countInStock,
+    };
+
+    // update the product image if a new image was uploaded
+    if (image) {
+      // decode base64 image data and write to file
+      const buffer = Buffer.from(image.split(';base64,').pop(), 'base64');
+      const fileName = `${Date.now()}.png`;
+      const imagePath = `public/uploads/${fileName}`;
+      await writeFile(imagePath, buffer);
+
+      // upload image to cloudinary
+      const uploadedImage = await cloudinary.uploader.upload(imagePath, {
+        folder: 'product-images',
+        allowedFormats: ['jpg', 'png'],
+        transformation: [{ width: 500, height: 500, crop: 'limit' }]
+      });
+
+      // update the product object with the new image URL
+      updatedProduct.image = uploadedImage.secure_url;
+
+      // delete the uploaded file from the server
+      fs.unlink(imagePath, (err) => {
+        if (err) console.error(err);
+      });
+    }
+
+    // update the product in the database
+    await Product.findByIdAndUpdate(productId, updatedProduct);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Product updated successfully',
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ status: 'error', message: 'Server error' });
+  }
+});
 
 
 //get all products in the system
@@ -224,52 +249,6 @@ app.get("/:id", async (req, res) => {
   }
 });
 
-
-// // Update product route with image upload
-// app.patch( "/update",
-// uploadOptions.single('image'), // specify the name of the image field in the request body
-//   async (req, res) => {
-//     const { status, category, name, price, description, company, countInStock } =
-//       req.body;
-//     try {
-//       const category = await Category.findById(req.body.category);
-//     if (!category) return res.status(400).send("Invalid Category");
-      
-
-//     const file = req.file;
-//     if(!file) return res.status(400).send('No image in the request')
-
-//     const fileName = file.filename
-//     const basePath = `${req.protocol}://${req.get('host')}/public/uploads/`;
-    
-//     const updatedProduct = await Product.findByIdAndUpdate(
-//         {
-//           status,
-//           category,
-//           name,
-//           price,
-//           description,
-//           image: `${basePath}${fileName}`, // update the path of the uploaded image in the image field of the product schema
-//           // images:req.body.images.split(","),
-//           company,
-//           countInStock,
-//         },
-//         { new: true }
-//       );
-//       if (!updatedProduct) return res.status(500).send("the product cannot be updated!");
-
-//       res.status(200).json({
-//         status: "success",
-//         message: "Users data retrieved successfully",
-//         updatedProduct,
-//       });
-//       // res.json(updatedProduct);
-//     } catch (err) {
-//       res.status(400).json({ message: err.message });
-//     }
-//   }
-// );
-
 //delete product
 app.delete("/:id", async (req, res) => {
   try {
@@ -292,39 +271,6 @@ app.delete("/:id", async (req, res) => {
 });
 
 
-
-
-
-
-// app.put(
-//   '/gallery-images', 
-//   uploadOptions.array('images', 10), 
-//   async (req, res)=> {
-//        const files = req.files
-//        let imagesPaths = [];
-//        const basePath = `${req.protocol}://${req.get('host')}/public/uploads/`;
-
-//        if(files) {
-//           files.map(file =>{
-//               imagesPaths.push(`${basePath}${file.filename}`);
-//           })
-//        }
-
-//        const product = await Product.findByIdAndUpdate(
-      
-//           {
-//               images: imagesPaths
-//           },
-//           { new: true}
-//       )
-
-//       if(!product)
-//           return res.status(500).send('the gallery cannot be updated!')
-
-//       res.send(product);
-//   }
-// )
-
 app.get("/get/search", async (req, res) => {
   try {
     const { keyword } = req.body;
@@ -346,5 +292,6 @@ app.get("/get/search", async (req, res) => {
       .json({ status: "error", message: "Server error", products: null });
   }
 });
+
 
 export default app;
