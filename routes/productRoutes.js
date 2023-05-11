@@ -3,6 +3,7 @@ import * as dotenv from "dotenv";
 
 import Category from "../mongodb/models/category.js";
 import Product from "../mongodb/models/product.js";
+import User from "../mongodb/models/user.js";
 
 //image imports
 import cloudinary from "cloudinary";
@@ -293,5 +294,56 @@ app.get("/get/search", async (req, res) => {
   }
 });
 
+
+
+app.get('/inCart/:category', async (req, res) => {
+  try {
+
+    var categoryName = req.params.category;
+
+    Category.findOne({ name: categoryName });
+    const product = await Product.find({ category: categoryName });
+
+    if (!product) {
+      res.status(500).json({ success: false });
+    }
+
+    const { nationalId } = req.body;
+
+    // Find the user by nationalId
+    const user = await User.findOne({ nationalId });
+
+    if (!user) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'User not found',
+      });
+    }
+
+    // Get all products
+    const products = await Product.find({});
+
+    // Check if each product is in the user's cart / favourite product
+    const productsWithStatus = products.map((product) => {
+      const inCart = user?.inCart.some((cartItem) => cartItem.product.toString() === product._id.toString());
+      const inFavorites = user?.favoriteProducts.some((favoriteProductId) => favoriteProductId.toString() === product._id.toString());
+
+      return {
+        ...product.toJSON(),
+        inCart,
+        inFavorites,
+      };
+    });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Products retrieved successfully',
+      products: productsWithStatus,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ status: 'error', message: 'Server error' });
+  }
+});
 
 export default app;

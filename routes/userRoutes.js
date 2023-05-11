@@ -56,7 +56,7 @@ app.post("/register", async (req, res) => {
     res.status(201).json({
       status: "success",
       message: "User registered successfully",
-      user: { name, email, phone, nationalId, gender, token },
+      user: { name, email, phone, nationalId, gender, token},
     });
   } catch (err) {
     res.status(500).json({ status: "error", message: err.message, user: null });
@@ -175,49 +175,97 @@ app.post("/profile", async (req, res) => {
 });
 
 app.put("/update", async (req, res) => {
+  const { token } = req.body;    
+  const { name, email, phone, gender, password } = req.body;
+
   try {
-    const { token } = req.body;
-    var existingUser = await User.findOne({ token });
-    if (!existingUser)
-      return res.status(200).json({ message: "Not valid user.", user: null });
+    const user = await User.findOne({token});
 
-    var { name, email, phone, nationalId, gender, password } = existingUser;
+    if (!user) {
+      return res
+        .status(404)
+        .json({ status: "failure", message: "User not found" });
+    }
 
-    const updateUser = {
-      name: req.body.name,
-      email: req.body.email,
-      password: req.body.password,
-      phone: req.body.phone,
-      gender: req.body.gender,
+    // Hash the password before saving it
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    user.name = name || user.name;
+    user.email = email || user.email;
+    user.phone = phone || user.phone;
+    user.gender = gender || user.gender;
+    user.password = hashedPassword || user.password;
+
+    await user.save();
+
+    // Return the updated user object with the password as a string
+    const updatedUser = {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      gender: user.gender,
+      password: password || "",
     };
 
-    const afterUpdate = await User.updateOne(
-      { token: token },
-      { $set: updateUser }
-    );
-    if (!afterUpdate)
-      return res.status(200).json({ message: "Not valid user." });
-
-    existingUser = await User.findOne({ token });
-    res.status(201).json({
+    res.status(200).json({
       status: "success",
-      message: "User data updated successfully",
-      user: {
-        name: existingUser.name,
-        email: existingUser.email,
-        phone: existingUser.phone,
-        password: existingUser.password,
-        nationalId: existingUser.nationalId,
-        gender: existingUser.gender,
-        token: existingUser.token,
-      },
+      message: "User updated successfully",
+      user: updatedUser,
     });
   } catch (error) {
-    res
-      .status(200)
-      .json({ status: "error", message: error.message, user: null });
+    console.log(error);
+    res.status(500).json({ status: "failure", message: "Server error" });
   }
 });
+
+// app.put("/update", async (req, res) => {
+//   try {
+//     const { token } = req.body;
+//     var existingUser = await User.findOne({ token });
+//     if (!existingUser)
+//       return res.status(200).json({ message: "Not valid user.", user: null });
+
+//     var { name, email, phone, nationalId, gender, password } = existingUser;
+
+//     const hashedPassword = await bcrypt.hash(password, 10);
+
+//     const updateUser = {
+//       name: req.body.name,
+//       email: req.body.email,
+//       password: hashedPassword,
+//       phone: req.body.phone,
+//       gender: req.body.gender,
+//     };
+
+//     const afterUpdate = await User.updateOne(
+//       { token: token },
+//       { $set: updateUser }
+//     );
+//     if (!afterUpdate)
+//       return res.status(200).json({ message: "Not valid user." });
+
+//     existingUser = await User.findOne({ token });
+//     res.status(201).json({
+//       status: "success",
+//       message: "User data updated successfully",
+//       user: {
+//         name: existingUser.name,
+//         email: existingUser.email,
+//         phone: existingUser.phone,
+//         password: hashedPassword,
+//         nationalId: existingUser.nationalId,
+//         gender: existingUser.gender,
+//         token: existingUser.token,
+//       },
+//     });
+//   } catch (error) {
+//     res
+//       .status(200)
+//       .json({ status: "error", message: error.message, user: null });
+//   }
+// });
 
 app.delete("/delete", async (req, res) => {
   try {
