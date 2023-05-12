@@ -154,6 +154,8 @@ app.post("/profile", async (req, res) => {
         .json({ status: "error", message: "User not found", user: null });
     }
 
+    // const hasPassword = user.password ? true : false;
+
     res.status(200).json({
       status: "success",
       message: null,
