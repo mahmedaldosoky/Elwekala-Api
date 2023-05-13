@@ -202,7 +202,7 @@ app.put("/update/:id", async (req, res) => {
 
     // update product properties
     product.status = status;
-    product.category = categoryDoc._id;
+    product.category = categoryDoc.name;
     product.name = name;
     product.description = description;
     product.price = price;
