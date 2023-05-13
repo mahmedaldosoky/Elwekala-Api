@@ -386,22 +386,26 @@ app.get("/get/search", async (req, res) => {
   }
 });
 
+
 app.get("/inCart/:category", async (req, res) => {
   try {
-    var categoryName = req.params.category;
-
-    Category.findOne({ name: categoryName });
-    const product = await Product.find({ category: categoryName });
-
-    if (!product) {
-      res.status(500).json({ success: false });
-    }
-
+    const categoryName = req.params.category;
     const { nationalId } = req.body;
+
+    // Find the category by name
+
+    const category = await Category.findOne({ name: categoryName });
+    
+    console.log(category);
+    if (!category) {
+      return res.status(404).json({
+        status: "error",
+        message: "Invalid Category",
+      });
+    }
 
     // Find the user by nationalId
     const user = await User.findOne({ nationalId });
-
     if (!user) {
       return res.status(404).json({
         status: "error",
@@ -409,8 +413,8 @@ app.get("/inCart/:category", async (req, res) => {
       });
     }
 
-    // Get all products
-    const products = await Product.find({});
+    // Get all products in the category
+    const products = await Product.find({ category: categoryName });
 
     // Check if each product is in the user's cart / favourite product
     const productsWithStatus = products.map((product) => {
