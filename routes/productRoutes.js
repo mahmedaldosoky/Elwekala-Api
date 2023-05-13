@@ -396,7 +396,7 @@ app.get("/inCart/:category", async (req, res) => {
 
     const category = await Category.findOne({ name: categoryName });
     
-    console.log(category);
+    
     if (!category) {
       return res.status(404).json({
         status: "error",
