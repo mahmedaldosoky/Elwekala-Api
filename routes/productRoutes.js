@@ -135,13 +135,8 @@ app.put("/update/:id", async (req, res) => {
     countInStock,
     status,
     category,
-    image,
-    images,
   } = req.body;
   const productId = req.params.id;
-
-  let mainImagePath = "";
-  let additionalImagePaths = [];
 
   try {
     // Find product by ID
@@ -151,54 +146,6 @@ app.put("/update/:id", async (req, res) => {
     //  Find category by name
     const categoryDoc = await Category.findOne({ name: category });
     if (!categoryDoc) return res.status(400).send("Invalid Category");
-
-    // Update main image if provided
-    if (image) {
-      // decode base64 image data and write to file
-      const mainBuffer = Buffer.from(image.split(";base64,").pop(), "base64");
-      const mainFileName = `${Date.now()}-main.png`;
-      const mainImagePath = `public/uploads/${mainFileName}`;
-      await writeFile(mainImagePath, mainBuffer);
-
-      // upload main image to cloudinary
-      const mainUploadedImage = await cloudinary.uploader.upload(
-        mainImagePath,
-        {
-          folder: "product-images",
-          allowedFormats: ["jpg", "png"],
-          transformation: [{ width: 500, height: 500, crop: "limit" }],
-        }
-      );
-
-      // update product with main image URL
-      product.image = mainUploadedImage.secure_url;
-    }
-
-    // Update additional images if provided
-    if (images) {
-      for (const image of images) {
-        // decode base64 image data and write to file
-        const buffer = Buffer.from(image.split(";base64,").pop(), "base64");
-        const fileName = `${Date.now()}-${Math.floor(
-          Math.random() * 100000
-        )}.png`;
-        const imagePath = `public/uploads/${fileName}`;
-        await writeFile(imagePath, buffer);
-
-        // upload image to cloudinary
-        const uploadedImage = await cloudinary.uploader.upload(imagePath, {
-          folder: "product-images",
-          allowedFormats: ["jpg", "png"],
-          transformation: [{ width: 500, height: 500, crop: "limit" }],
-        });
-
-        // add image URL to images array
-        product.images.push(uploadedImage.secure_url);
-
-        // add image path to array of additional image paths
-        additionalImagePaths.push(imagePath);
-      }
-    }
 
     // update product properties
     product.status = status;
@@ -219,20 +166,7 @@ app.put("/update/:id", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ status: "error", message: "Server error" });
-  } finally {
-    // delete uploaded files from the server
-    if (mainImagePath) {
-      fs.unlink(mainImagePath, (err) => {
-        if (err) console.error(err);
-      });
-    }
-
-    for (const imagePath of additionalImagePaths) {
-      fs.unlink(imagePath, (err) => {
-        if (err) console.error(err);
-      });
-    }
-  }
+  } 
 });
 
 //get all products in the system
