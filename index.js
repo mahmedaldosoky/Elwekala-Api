@@ -7,6 +7,7 @@ import productRoutes from "./routes/productRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import favoriteRoutes from "./routes/favoriteRoutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
 import connectDB from "./mongodb/connect.js";
 
 dotenv.config();
@@ -23,6 +24,7 @@ app.use("/category", categoryRoutes);
 app.use("/product", productRoutes);
 app.use("/user", userRoutes);
 app.use("/favorite", favoriteRoutes);
+app.use("/review", reviewRoutes);
 
 app.get("/", async (req, res) => {
   res.status(200).json({
