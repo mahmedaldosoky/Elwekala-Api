@@ -61,7 +61,7 @@ app.post("/", async (req, res) => {
 
     res.status(200).json({
       status: "success",
-      message: "Category data retrieved successfully",
+      message: "Category data added successfully",
       category,
     });
   } catch (err) {
