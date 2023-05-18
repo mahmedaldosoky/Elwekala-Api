@@ -4,13 +4,34 @@ import bcrypt from "bcryptjs";
 
 import User from "../mongodb/models/user.js";
 
+//image imports
+import cloudinary from "cloudinary";
+import fs from "fs";
+import { promisify } from "util";
+
 dotenv.config();
 
 const app = express.Router();
 
+// configure cloudinary
+cloudinary.config({
+  cloud_name: "dzh2hde2n",
+  api_key: "692425944689747",
+  api_secret: "WPWBWEFlS8DZ3ND9oohrQQ7A9DM",
+});
+
+// helper function to promisify fs.writeFile
+const writeFile = promisify(fs.writeFile);
+
+//add user
+
 app.post("/register", async (req, res) => {
+
+  let profileImagePath = "";
+
   try {
-    const { name, email, phone, nationalId, gender, password } = req.body;
+    const { name, email, phone, nationalId, gender, password, profileImage } = req.body;
+
 
     if (!name || !email || !phone || !nationalId || !gender || !password) {
       return res
@@ -41,11 +62,31 @@ app.post("/register", async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // decode base64 image data and write to file
+    const profileImageBuffer = Buffer.from(
+      profileImage.split(";base64,").pop(),
+      "base64"
+    );
+    const profileImageFileName = `${Date.now()}-profile.png`;
+    profileImagePath = `public/uploads/${profileImageFileName}`;
+    await writeFile(profileImagePath, profileImageBuffer);
+
+    // upload profile image to cloudinary
+    const uploadedProfileImage = await cloudinary.uploader.upload(
+      profileImagePath,
+      {
+        folder: "user-profile-images",
+        allowedFormats: ["jpg", "png"],
+        transformation: [{ width: 500, height: 500, crop: "limit" }],
+      }
+    );
+
     const newUser = new User({
       name,
       email,
       phone,
       nationalId,
+      profileImage: uploadedProfileImage.secure_url,
       gender,
       password: hashedPassword,
       token,
@@ -56,10 +97,25 @@ app.post("/register", async (req, res) => {
     res.status(201).json({
       status: "success",
       message: "User registered successfully",
-      user: { name, email, phone, nationalId, gender, token},
+      user: {
+        name: newUser.name,
+        email: newUser.email,
+        phone: newUser.phone,
+        nationalId: newUser.nationalId,
+        gender: newUser.gender,
+        profileImage: newUser.profileImage,
+        token: newUser.token,
+      },
     });
   } catch (err) {
     res.status(500).json({ status: "error", message: err.message, user: null });
+  }finally {
+    // delete the uploaded file from the server
+    if (profileImagePath) {
+      fs.unlink(profileImagePath, (err) => {
+        if (err) console.error(err);
+      });
+    }
   }
 });
 
@@ -105,6 +161,7 @@ app.post("/login", async (req, res) => {
         phone: user.phone,
         nationalId: user.nationalId,
         gender: user.gender,
+        profileImage: user.profileImage,
         token,
       },
     });
@@ -165,6 +222,7 @@ app.post("/profile", async (req, res) => {
         phone: user.phone,
         nationalId: user.nationalId,
         gender: user.gender,
+        profileImage: user.profileImage,
         token: token,
       },
     });
