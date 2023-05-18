@@ -46,6 +46,15 @@ app.post("/add", async (req, res) => {
     const categoryDoc = await Category.findOne({ name: category });
     if (!categoryDoc) return res.status(400).send("Invalid Category");
 
+    const existingProduct = await Product.findOne({ name });
+    if (existingProduct) {
+      return res.status(400).json({
+        status: "error",
+        message: "Product already exists",
+        product: existingProduct,
+      });
+    }
+
     // decode base64 image data and write to file
     const mainBuffer = Buffer.from(image.split(";base64,").pop(), "base64");
     const mainFileName = `${Date.now()}-main.png`;
