@@ -41,7 +41,7 @@ app.get("/", async (req, res) => {
       .exec();
     // const messages = await Message.find();
 
-    res.json(messages);
+    res.json({ messages: messages });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
