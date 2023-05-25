@@ -8,6 +8,7 @@ import userRoutes from "./routes/userRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import favoriteRoutes from "./routes/favoriteRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
+import reportRoutes from "./routes/reportRoutes.js";
 import connectDB from "./mongodb/connect.js";
 
 dotenv.config();
@@ -20,6 +21,7 @@ app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 app.use(cors());
 
 app.use("/cart", cartRoutes);
+app.use("/report", reportRoutes)
 app.use("/category", categoryRoutes);
 app.use("/product", productRoutes);
 app.use("/user", userRoutes);
