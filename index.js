@@ -8,6 +8,8 @@ import userRoutes from "./routes/userRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import favoriteRoutes from "./routes/favoriteRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
+import reportRoutes from "./routes/reportRoutes.js";
+import chatRoutes from "./routes/chatRoutes.js";
 import connectDB from "./mongodb/connect.js";
 
 dotenv.config();
