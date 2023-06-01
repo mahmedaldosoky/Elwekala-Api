@@ -7,7 +7,7 @@ const productSchema = mongoose.Schema({
   },
   category: {
     type: mongoose.Schema.Types.String,
-    ref: "category",
+    ref: "Category",
     required: true,
   },
   name: {

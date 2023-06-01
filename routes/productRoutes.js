@@ -136,15 +136,8 @@ app.post("/add", async (req, res) => {
 //update product
 
 app.put("/update/:id", async (req, res) => {
-  const {
-    name,
-    price,
-    description,
-    company,
-    countInStock,
-    status,
-    category,
-  } = req.body;
+  const { name, price, description, company, countInStock, status, category } =
+    req.body;
   const productId = req.params.id;
 
   try {
@@ -175,7 +168,7 @@ app.put("/update/:id", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ status: "error", message: "Server error" });
-  } 
+  }
 });
 
 //get all products in the system
@@ -329,7 +322,6 @@ app.get("/get/search", async (req, res) => {
   }
 });
 
-
 app.get("/inCart/:category", async (req, res) => {
   try {
     const categoryName = req.params.category;
@@ -338,8 +330,7 @@ app.get("/inCart/:category", async (req, res) => {
     // Find the category by name
 
     const category = await Category.findOne({ name: categoryName });
-    
-    
+
     if (!category) {
       return res.status(404).json({
         status: "error",
@@ -385,6 +376,45 @@ app.get("/inCart/:category", async (req, res) => {
     console.error(err);
     res.status(500).json({ status: "error", message: "Server error" });
   }
+});
+
+app.get("/filer/get", (req, res) => {
+  const { categories, companies, minPrice, maxPrice } = req.body;
+
+  // Create an empty filter object
+  const filter = {};
+
+  // Add categories filter if provided
+  if (categories && Array.isArray(categories)) {
+    filter.category = { $in: categories };
+  }
+
+  // Add companies filter if provided
+  if (companies && Array.isArray(companies)) {
+    filter.company = { $in: companies };
+  }
+
+  // Add price filter if provided
+  if (minPrice && maxPrice) {
+    filter.price = { $gte: minPrice, $lte: maxPrice };
+  } else if (minPrice) {
+    filter.price = { $gte: minPrice };
+  } else if (maxPrice) {
+    filter.price = { $lte: maxPrice };
+  }
+
+  // Use the filter object to find products in the database
+  Product.find(filter)
+    .populate("category", "name") // Populate the referenced category field with its name
+    .then((products) => {
+      res.json(products);
+    })
+    .catch((err) => {
+      console.error(err); // Log the error for debugging purposes
+      res
+        .status(500)
+        .json({ error: "An error occurred while processing the request." });
+    });
 });
 
 export default app;
