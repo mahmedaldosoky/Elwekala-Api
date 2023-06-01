@@ -407,12 +407,19 @@ app.get("/filer/get", (req, res) => {
   Product.find(filter)
     .populate("category", "name") // Populate the referenced category field with its name
     .then((products) => {
-      res.json(products);
+      res.status(200).json({
+        status: "success",
+        message:
+          products.length > 0
+            ? "products retrieved successfully"
+            : "no products were found",
+        products: products,
+      });
     })
     .catch((err) => {
       console.error(err); // Log the error for debugging purposes
       res
-        .status(500)
+        .status(200)
         .json({ error: "An error occurred while processing the request." });
     });
 });
