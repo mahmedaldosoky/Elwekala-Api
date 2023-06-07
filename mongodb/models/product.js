@@ -27,9 +27,11 @@ const productSchema = mongoose.Schema({
     default: "",
     required: true,
   },
-   images: [{
+  images: [
+    {
       type: String,
-   }],
+    },
+  ],
   company: {
     type: String,
     required: true,
@@ -39,6 +41,11 @@ const productSchema = mongoose.Schema({
     required: true,
     min: 0,
     max: 500,
+  },
+  sales: {
+    type: Number,
+    default: 0,
+    required: true,
   },
 });
 

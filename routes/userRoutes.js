@@ -26,12 +26,19 @@ const writeFile = promisify(fs.writeFile);
 //add user
 
 app.post("/register", async (req, res) => {
-
   let profileImagePath = "";
 
   try {
-    const { name, email, phone, nationalId, gender, password, profileImage } = req.body;
+    const { name, email, phone, nationalId, gender, password, profileImage } =
+      req.body;
 
+    if (password.length < 8) {
+      return res.status(200).json({
+        status: "error",
+        message: "Password should be at least 8 characters long.",
+        user: null,
+      });
+    }
 
     if (!name || !email || !phone || !nationalId || !gender || !password) {
       return res
@@ -109,7 +116,7 @@ app.post("/register", async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ status: "error", message: err.message, user: null });
-  }finally {
+  } finally {
     // delete the uploaded file from the server
     if (profileImagePath) {
       fs.unlink(profileImagePath, (err) => {
@@ -235,11 +242,11 @@ app.post("/profile", async (req, res) => {
 });
 
 app.put("/update", async (req, res) => {
-  const { token } = req.body;    
+  const { token } = req.body;
   const { name, email, phone, gender, password } = req.body;
 
   try {
-    const user = await User.findOne({token});
+    const user = await User.findOne({ token });
 
     if (!user) {
       return res
