@@ -319,52 +319,6 @@ app.put("/update", async (req, res) => {
   }
 });
 
-// app.put("/update", async (req, res) => {
-//   try {
-//     const { token } = req.body;
-//     var existingUser = await User.findOne({ token });
-//     if (!existingUser)
-//       return res.status(200).json({ message: "Not valid user.", user: null });
-
-//     var { name, email, phone, nationalId, gender, password } = existingUser;
-
-//     const hashedPassword = await bcrypt.hash(password, 10);
-
-//     const updateUser = {
-//       name: req.body.name,
-//       email: req.body.email,
-//       password: hashedPassword,
-//       phone: req.body.phone,
-//       gender: req.body.gender,
-//     };
-
-//     const afterUpdate = await User.updateOne(
-//       { token: token },
-//       { $set: updateUser }
-//     );
-//     if (!afterUpdate)
-//       return res.status(200).json({ message: "Not valid user." });
-
-//     existingUser = await User.findOne({ token });
-//     res.status(201).json({
-//       status: "success",
-//       message: "User data updated successfully",
-//       user: {
-//         name: existingUser.name,
-//         email: existingUser.email,
-//         phone: existingUser.phone,
-//         password: hashedPassword,
-//         nationalId: existingUser.nationalId,
-//         gender: existingUser.gender,
-//         token: existingUser.token,
-//       },
-//     });
-//   } catch (error) {
-//     res
-//       .status(200)
-//       .json({ status: "error", message: error.message, user: null });
-//   }
-// });
 
 app.delete("/delete", async (req, res) => {
   try {
@@ -431,5 +385,34 @@ app.post("/display", async (req, res) => {
 function generateToken() {
   return Math.random().toString(36).substr(2) + Date.now().toString(36);
 }
+
+
+//forget password
+app.post('/forget-password', async (req, res) => {
+  const { nationalId, newPassword } = req.body;
+
+  try {
+    // Find the user by national ID
+    const user = await User.findOne({ nationalId });
+
+    // Check if the user exists
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update the user's password with the hashed password
+    user.password = hashedPassword;
+    await user.save();
+
+    // Return a success response
+    res.json({ message: 'Password reset successful' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 
 export default app;
