@@ -32,6 +32,12 @@ app.post("/register", async (req, res) => {
     const { name, email, phone, nationalId, gender, password, profileImage } =
       req.body;
 
+    if (!name || !email || !phone || !nationalId || !gender || !password) {
+      return res
+        .status(200)
+        .json({ status: "error", message: "Invalid user data", user: null });
+    }
+
     if (password.length < 8) {
       return res.status(200).json({
         status: "error",
@@ -40,11 +46,37 @@ app.post("/register", async (req, res) => {
       });
     }
 
-    if (!name || !email || !phone || !nationalId || !gender || !password) {
-      return res
-        .status(200)
-        .json({ status: "error", message: "Invalid user data", user: null });
-    }
+    const isValidPhone = /^01\d{9}$/.test(phone);
+    const isValidNationalId = /^\d{14}$/.test(nationalId);
+    const isValidName = name.length >= 2;
+    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    if (!isValidPhone)
+      return res.status(400).send({
+        status: "error",
+        message:
+          "Invalid phone number. Please enter a valid phone number starting with '01' and consisting of 11 digits.",
+      });
+
+    if (!isValidNationalId)
+      return res.status(400).send({
+        status: "error",
+        message:
+          "Invalid national ID. Please enter a valid national ID consisting of exactly 14 digits.",
+      });
+
+    if (!isValidName)
+      return res.status(400).send({
+        status: "error",
+        message:
+          "Invalid name. Please enter a name with at least 2 characters.",
+      });
+
+    if (!isValidEmail)
+      return res.status(400).send({
+        status: "error",
+        message: "Invalid email address. Please enter a valid email address.",
+      });
 
     // Validate name to not be more than 2 words
     const nameWords = name.split(" ");
