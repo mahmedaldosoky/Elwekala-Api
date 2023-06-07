@@ -32,10 +32,10 @@ const userSchema = mongoose.Schema({
       message: (props) => `${props.value} is not a valid national ID!`,
     },
   },
-  profileImage: { 
-    type: String, 
-    required: true
-   },
+  profileImage: {
+    type: String,
+    required: true,
+  },
   gender: {
     type: String,
     enum: ["male", "female"],
