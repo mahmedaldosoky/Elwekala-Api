@@ -424,6 +424,7 @@ app.get("/filer/get", (req, res) => {
     });
 });
 
+
 // app.get("/get/top-sellers", async (req, res) => {
 //   const { limit } = req.body;
 
@@ -461,10 +462,36 @@ app.get('/get/top-sellers', async (req, res) => {
       topSellingCompany,
     });
 
-    //res.json(topSellingCompany);
+    // Return the top sellers as a response
+    res.json({products:topSellers});
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.post("/add/sale", async (req, res) => {
+  const { productId } = req.body;
+
+  try {
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    // Increase the sales by one
+    product.sales += 1;
+
+    // Save the updated product
+    await product.save();
+
+    return res
+      .status(200)
+      .json({ message: "Sales increased successfully", product });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 
