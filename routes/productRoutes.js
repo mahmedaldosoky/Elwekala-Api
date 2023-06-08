@@ -423,21 +423,48 @@ app.get("/filer/get", (req, res) => {
         .json({ error: "An error occurred while processing the request." });
     });
 });
-app.get("/get/top-sellers", async (req, res) => {
-  const { limit } = req.body;
 
+// app.get("/get/top-sellers", async (req, res) => {
+//   const { limit } = req.body;
+
+//   try {
+//     // Fetch the top sellers based on sales attribute in descending order
+//     const topSellers = await Product.find()
+//       .sort({ sales: -1 }) // Sort by sales attribute in descending order
+//       .limit(limit); // Retrieve the top 10 sellers (you can change the limit as needed)
+
+//     // Return the top sellers as a response
+//     res.json({products:topSellers});
+//   } catch (error) {
+//     // Handle any errors that occur during the process
+//     console.error(error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// });
+
+app.get('/get/top-sellers', async (req, res) => {
   try {
-    // Fetch the top sellers based on sales attribute in descending order
-    const topSellers = await Product.find()
-      .sort({ sales: -1 }) // Sort by sales attribute in descending order
-      .limit(limit); // Retrieve the top 10 sellers (you can change the limit as needed)
+    const topSellingCompany = await Product.aggregate([
+      {
+        $group: {
+          _id: "$company",
+          totalSales: { $sum: "$sales" },
+        },
+      },
+      { $sort: { totalSales: -1 } },
+      { $limit: 1 },
+    ]);
 
-    // Return the top sellers as a response
-    res.json({products:topSellers});
+    res.status(200).json({
+      status: "success",
+      message: "Products retrieved successfully",
+      topSellingCompany,
+    });
+
+    //res.json(topSellingCompany);
   } catch (error) {
-    // Handle any errors that occur during the process
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
