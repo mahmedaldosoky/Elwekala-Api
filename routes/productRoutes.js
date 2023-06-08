@@ -423,6 +423,7 @@ app.get("/filer/get", (req, res) => {
         .json({ error: "An error occurred while processing the request." });
     });
 });
+
 app.get("/get/top-sellers", async (req, res) => {
   const { limit } = req.body;
 
@@ -433,11 +434,36 @@ app.get("/get/top-sellers", async (req, res) => {
       .limit(limit); // Retrieve the top 10 sellers (you can change the limit as needed)
 
     // Return the top sellers as a response
-    res.json({products:topSellers});
+    res.json({ products: topSellers });
   } catch (error) {
     // Handle any errors that occur during the process
     console.error(error);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.post("/add/sale", async (req, res) => {
+  const { productId } = req.body;
+
+  try {
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    // Increase the sales by one
+    product.sales += 1;
+
+    // Save the updated product
+    await product.save();
+
+    return res
+      .status(200)
+      .json({ message: "Sales increased successfully", product });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 
