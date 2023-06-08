@@ -10,6 +10,7 @@ import favoriteRoutes from "./routes/favoriteRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 import connectDB from "./mongodb/connect.js";
 
 dotenv.config();
@@ -29,6 +30,7 @@ app.use("/user", userRoutes);
 app.use("/favorite", favoriteRoutes);
 app.use("/review", reviewRoutes);
 app.use("/chat", chatRoutes);
+app.use("/notification", notificationRoutes);
 
 app.get("/", async (req, res) => {
   res.status(200).json({
