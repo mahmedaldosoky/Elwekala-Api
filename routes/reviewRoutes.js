@@ -81,5 +81,22 @@ app.get("/allreviews/:productId", async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 });
+//delete review
+app.delete("/:id", async (req, res) => {
+  const reviewId = req.params.id;
 
+  try {
+    // Find the review by ID and remove it
+    const deletedReview = await Review.findByIdAndRemove(reviewId);
+
+    if (!deletedReview) {
+      return res.status(404).json({ message: "Review not found" });
+    }
+
+    return res.json({ message: "Review deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
 export default app;
