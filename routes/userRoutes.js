@@ -56,6 +56,7 @@ app.post("/register", async (req, res) => {
         status: "error",
         message:
           "Invalid phone number. Please enter a valid phone number starting with '01' and consisting of 11 digits.",
+        user: null,
       });
 
     if (!isValidNationalId)
@@ -63,6 +64,7 @@ app.post("/register", async (req, res) => {
         status: "error",
         message:
           "Invalid national ID. Please enter a valid national ID consisting of exactly 14 digits.",
+        user: null,
       });
 
     if (!isValidName)
@@ -70,12 +72,14 @@ app.post("/register", async (req, res) => {
         status: "error",
         message:
           "Invalid name. Please enter a name with at least 2 characters.",
+        user: null,
       });
 
     if (!isValidEmail)
       return res.status(400).send({
         status: "error",
         message: "Invalid email address. Please enter a valid email address.",
+        user: null,
       });
 
     // Validate name to not be more than 2 words
@@ -274,6 +278,8 @@ app.post("/profile", async (req, res) => {
 });
 
 app.put("/update", async (req, res) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const phoneRegex = /^01\d{9}$/;
   const { token } = req.body;
   const { name, email, phone, gender, password } = req.body;
 
@@ -282,8 +288,22 @@ app.put("/update", async (req, res) => {
 
     if (!user) {
       return res
-        .status(404)
-        .json({ status: "failure", message: "User not found" });
+        .status(200)
+        .json({ status: "failure", message: "User not found",user:null, });
+    }
+
+    // Validate email
+    if (email && !emailRegex.test(email)) {
+      return res
+        .status(200)
+        .json({ status: "failure", message: "Invalid email format",user:null, });
+    }
+
+    // Validate phone number
+    if (phone && (!phoneRegex.test(phone) || phone.length !== 11)) {
+      return res
+        .status(200)
+        .json({ status: "failure", message: "Invalid phone number format" ,user:null,});
     }
 
     // Hash the password before saving it
@@ -315,10 +335,9 @@ app.put("/update", async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ status: "failure", message: "Server error" });
+    res.status(200).json({ status: "failure", message: "Server error" });
   }
 });
-
 
 app.delete("/delete", async (req, res) => {
   try {
@@ -386,9 +405,8 @@ function generateToken() {
   return Math.random().toString(36).substr(2) + Date.now().toString(36);
 }
 
-
 //forget password
-app.post('/forget-password', async (req, res) => {
+app.post("/forget-password", async (req, res) => {
   const { nationalId, newPassword } = req.body;
 
   try {
@@ -397,7 +415,7 @@ app.post('/forget-password', async (req, res) => {
 
     // Check if the user exists
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
 
     // Hash the new password
@@ -408,10 +426,10 @@ app.post('/forget-password', async (req, res) => {
     await user.save();
 
     // Return a success response
-    res.json({ message: 'Password reset successful' });
+    res.json({ message: "Password reset successful" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: "Server error" });
   }
 });
 

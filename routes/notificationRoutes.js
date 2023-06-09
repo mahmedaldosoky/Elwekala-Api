@@ -40,7 +40,7 @@ app.get("/", async (req, res) => {
     const notifications = await Notification.find();
 
     // Return the retrieved notifications
-    res.status(200).json(notifications);
+    res.status(200).json({ notifications: notifications });
   } catch (error) {
     // Return an error response if there is any issue
     res
