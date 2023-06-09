@@ -278,6 +278,8 @@ app.post("/profile", async (req, res) => {
 });
 
 app.put("/update", async (req, res) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const phoneRegex = /^01\d{9}$/;
   const { token } = req.body;
   const { name, email, phone, gender, password } = req.body;
 
@@ -288,6 +290,20 @@ app.put("/update", async (req, res) => {
       return res
         .status(404)
         .json({ status: "failure", message: "User not found" });
+    }
+
+    // Validate email
+    if (email && !emailRegex.test(email)) {
+      return res
+        .status(400)
+        .json({ status: "failure", message: "Invalid email format" });
+    }
+
+    // Validate phone number
+    if (phone && (!phoneRegex.test(phone) || phone.length !== 11)) {
+      return res
+        .status(400)
+        .json({ status: "failure", message: "Invalid phone number format" });
     }
 
     // Hash the password before saving it
