@@ -289,21 +289,21 @@ app.put("/update", async (req, res) => {
     if (!user) {
       return res
         .status(404)
-        .json({ status: "failure", message: "User not found" });
+        .json({ status: "failure", message: "User not found",user:null, });
     }
 
     // Validate email
     if (email && !emailRegex.test(email)) {
       return res
         .status(400)
-        .json({ status: "failure", message: "Invalid email format" });
+        .json({ status: "failure", message: "Invalid email format",user:null, });
     }
 
     // Validate phone number
     if (phone && (!phoneRegex.test(phone) || phone.length !== 11)) {
       return res
         .status(400)
-        .json({ status: "failure", message: "Invalid phone number format" });
+        .json({ status: "failure", message: "Invalid phone number format" ,user:null,});
     }
 
     // Hash the password before saving it
