@@ -288,21 +288,21 @@ app.put("/update", async (req, res) => {
 
     if (!user) {
       return res
-        .status(404)
+        .status(200)
         .json({ status: "failure", message: "User not found",user:null, });
     }
 
     // Validate email
     if (email && !emailRegex.test(email)) {
       return res
-        .status(400)
+        .status(200)
         .json({ status: "failure", message: "Invalid email format",user:null, });
     }
 
     // Validate phone number
     if (phone && (!phoneRegex.test(phone) || phone.length !== 11)) {
       return res
-        .status(400)
+        .status(200)
         .json({ status: "failure", message: "Invalid phone number format" ,user:null,});
     }
 
@@ -335,7 +335,7 @@ app.put("/update", async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ status: "failure", message: "Server error" });
+    res.status(200).json({ status: "failure", message: "Server error" });
   }
 });
 
