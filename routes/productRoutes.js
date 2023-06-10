@@ -424,7 +424,6 @@ app.get("/filer/get", (req, res) => {
     });
 });
 
-
 // app.get("/get/top-sellers", async (req, res) => {
 //   const { limit } = req.body;
 
@@ -443,7 +442,7 @@ app.get("/filer/get", (req, res) => {
 //   }
 // });
 
-app.get('/get/top-sellers', async (req, res) => {
+app.get("/get/top-sellers", async (req, res) => {
   try {
     const topSellingCompany = await Product.aggregate([
       {
@@ -463,13 +462,20 @@ app.get('/get/top-sellers', async (req, res) => {
     });
 
     // Return the top sellers as a response
-    res.json({products:topSellers});
+    res.json({ products: topSellers });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
-
+app.get("/get/sorted-products", async (req, res) => {
+  try {
+    const products = await Product.find({}).sort({ price: 1 });
+    res.json({products:products});
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 app.post("/add/sale", async (req, res) => {
   const { productId } = req.body;
 
