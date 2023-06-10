@@ -19,7 +19,12 @@ app.post("/", async (req, res) => {
     await notification.save();
 
     // Return a success response
-    res.status(200).json({ message: "Notification added successfully" });
+    res.status(200).json({
+      status: "success",
+      message: "Notification added successfully",
+      notification,
+    });
+    
   } catch (error) {
     // Return an error response if there is any issue
     res
@@ -41,6 +46,28 @@ app.get("/", async (req, res) => {
     res
       .status(500)
       .json({ error: "An error occurred while retrieving notifications" });
+  }
+});
+
+// DELETE route for deleting a notification
+app.delete('/:id', async (req, res) => {
+  try {
+    // Extract the notification ID from the request parameters
+    const { id } = req.params;
+
+    // Find the notification by ID and delete it
+    const deletedNotification = await Notification.findByIdAndDelete(id);
+
+    // Check if the notification was found and deleted
+    if (!deletedNotification) {
+      return res.status(404).json({ error: 'Notification not found' });
+    }
+
+    // Return a success response
+    res.status(200).json({ message: 'Notification deleted successfully' });
+  } catch (error) {
+    // Return an error response if there is any issue
+    res.status(500).json({ error: 'An error occurred while deleting the notification' });
   }
 });
 
