@@ -1,6 +1,5 @@
 import express from "express";
-import * as dotenv from "dotenv";
-
+import dotenv from "dotenv";
 import Category from "../mongodb/models/category.js";
 import Product from "../mongodb/models/product.js";
 import User from "../mongodb/models/user.js";
@@ -16,9 +15,9 @@ const app = express.Router();
 
 // configure cloudinary
 cloudinary.config({
-  cloud_name: "dzh2hde2n",
-  api_key: "692425944689747",
-  api_secret: "WPWBWEFlS8DZ3ND9oohrQQ7A9DM",
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 // helper function to promisify fs.writeFile
